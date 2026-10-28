@@ -7,8 +7,10 @@ sem dependências nativas, permissões, timers, polling ou requisições de rede
 composer require pushinbr/pam-native-i18n:^0.1
 ```
 
-Requer PHP 8.5 e PAM Native 1.46 com o gancho de helpers da branch
-`integrate/port3-20261027` (extração u3), ou uma versão posterior que o inclua.
+Requer PHP 8.5 e PAM Native ^1.46. O autoload do Composer registra `t()` no
+gancho genérico dos cores extraídos. No PAM 1.46 anterior à extração, instala
+um alias antecipado para o tradutor que o `t()` embutido chama; por isso, carregue
+`vendor/autoload.php` antes de registrar catálogos.
 
 ```php
 use Pam\Native\I18n\Translator;
