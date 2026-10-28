@@ -1,0 +1,28 @@
+{
+    "name": "pushinbr/pam-native-i18n",
+    "description": "Optional message catalogs, translation, locale preferences and formatting for PAM Native.",
+    "type": "pam-native-plugin",
+    "license": "Apache-2.0",
+    "homepage": "https://github.com/push-in/pam-native-i18n",
+    "require": {
+        "php": "^8.5",
+        "pushinbr/pam-native": "^1.46"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pam\\Native\\I18n\\": "src/"
+        },
+        "files": [
+            "src/functions.php",
+            "src/bootstrap.php"
+        ]
+    },
+    "scripts": {
+        "test": "@php tests/run.php"
+    },
+    "extra": {
+        "pam-native": {
+            "plugin": "pam-native.plugin.json"
+        }
+    }
+}
