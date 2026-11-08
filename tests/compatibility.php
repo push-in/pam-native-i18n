@@ -9,10 +9,16 @@ use Pam\Native\Composables\Sources;
 use function Pam\Native\I18n\t;
 
 $assert(class_exists('Pam\\Native\\I18n\\I18n') && is_a('Pam\\Native\\I18n\\I18n', Translator::class, true), 'Legacy I18n is a plugin alias.');
-$assert(class_exists('Pam\\Native\\Support\\Format') && is_a('Pam\\Native\\Support\\Format', Format::class, true), 'Legacy Format is the same class.');
-$assert(\Pam\Native\Support\DateStyle::Medium === DateStyle::Medium, 'DateStyle cases retain identity.');
-$assert(\Pam\Native\Support\RelativeTimeStyle::Tiny === RelativeTimeStyle::Tiny, 'RelativeTimeStyle cases retain identity.');
-$assert(count(array_filter(MovedToPlugin::aliased(), static fn (string $package): bool => $package === 'pushinbr/pam-native-i18n')) === 4, 'All four shims are recorded.');
+// Cores released before the i18n extraction (no TemplateExpression::registerFunction)
+// still own Support\\Format and its enums; only an extracted core shims them.
+if (method_exists(TemplateExpression::class, 'registerFunction')) {
+    $assert(class_exists('Pam\\Native\\Support\\Format') && is_a('Pam\\Native\\Support\\Format', Format::class, true), 'Legacy Format is the same class.');
+    $assert(\Pam\Native\Support\DateStyle::Medium === DateStyle::Medium, 'DateStyle cases retain identity.');
+    $assert(\Pam\Native\Support\RelativeTimeStyle::Tiny === RelativeTimeStyle::Tiny, 'RelativeTimeStyle cases retain identity.');
+    $assert(count(array_filter(MovedToPlugin::aliased(), static fn (string $package): bool => $package === 'pushinbr/pam-native-i18n')) === 4, 'All four shims are recorded.');
+} else {
+    $assert(class_exists('Pam\\Native\\Support\\Format') && !is_a('Pam\\Native\\Support\\Format', Format::class, true), 'A pre-extraction core keeps its own Format.');
+}
 Translator::source('pt');
 Translator::catalog('pt', ['common' => ['hello' => 'Olá {name}']]);
 Translator::use('pt');
@@ -31,7 +37,10 @@ TemplateExpression::useGeneratedCode(true);
 Sources::reset();
 $system = \Pam\Native\useLocale();
 Translator::use('fr-CA');
-$assert($system->value === 'en', 'Core locale ignores translation preferences.');
+$assert(
+    $system->value === (method_exists(TemplateExpression::class, 'registerFunction') ? 'en' : 'fr-CA'),
+    'An extracted core locale ignores translation preferences; a 1.46 core still follows the legacy I18n override.',
+);
 Translator::reset();
 Sources::reset();
 
